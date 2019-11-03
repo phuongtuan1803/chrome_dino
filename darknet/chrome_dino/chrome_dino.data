@@ -1,5 +1,0 @@
-classes= 3
-train  = data/train.txt
-valid  = data/train.txt
-backup = backup/
-names = data/chrome_dino.names

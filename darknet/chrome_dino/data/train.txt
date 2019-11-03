@@ -1,4 +1,0 @@
-data/labels/chrome_dino1.PNG
-data/labels/chrome_dino2.PNG
-data/labels/chrome_dino3.PNG
-data/labels/chrome_dino4.PNG

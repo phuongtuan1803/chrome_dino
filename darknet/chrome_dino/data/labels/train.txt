@@ -1,4 +1,0 @@
-img/chrome_dino1.PNG
-img/chrome_dino2.PNG
-img/chrome_dino3.PNG
-img/chrome_dino4.PNG
