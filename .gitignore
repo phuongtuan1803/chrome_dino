@@ -102,3 +102,5 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+chrome_dino/darknet53.conv.74
+darknet/cudnn64_7.dll
