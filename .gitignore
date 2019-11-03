@@ -104,3 +104,9 @@ venv.bak/
 .mypy_cache/
 chrome_dino/darknet53.conv.74
 darknet/cudnn64_7.dll
+yolo-object-detection/.idea/codeStyles/codeStyleConfig.xml
+yolo-object-detection/.idea/misc.xml
+yolo-object-detection/.idea/modules.xml
+yolo-object-detection/.idea/vcs.xml
+yolo-object-detection/.idea/workspace.xml
+yolo-object-detection/.idea/yolo-object-detection.iml
