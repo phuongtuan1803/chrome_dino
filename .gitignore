@@ -110,3 +110,4 @@ yolo-object-detection/.idea/modules.xml
 yolo-object-detection/.idea/vcs.xml
 yolo-object-detection/.idea/workspace.xml
 yolo-object-detection/.idea/yolo-object-detection.iml
+*.weights
