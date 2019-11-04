@@ -24,7 +24,7 @@ ap.add_argument("-t", "--threshold", type=float, default=0.3,
 args = vars(ap.parse_args())
 
 # load the COCO class labels our YOLO model was trained on
-labelsPath = os.path.sep.join([args["yolo"], "test1.names"])
+labelsPath = os.path.sep.join([args["yolo"], "obj.names"])
 LABELS = open(labelsPath).read().strip().split("\n")
 
 # initialize a list of colors to represent each possible class label
@@ -33,8 +33,8 @@ COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
 	dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-weightsPath = os.path.sep.join([args["yolo"], "chrome_dino_2000t.weights"])
-configPath = os.path.sep.join([args["yolo"], "chrome_dino.cfg"])
+weightsPath = os.path.sep.join([args["yolo"], "yolov3-tiny_last.weights"])
+configPath = os.path.sep.join([args["yolo"], "yolov3-tiny.cfg"])
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO
