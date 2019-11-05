@@ -1,5 +1,5 @@
 # USAGE
-# python yolo_video.py --input videos/airport.mp4 --output output/airport_output.avi --yolo yolo-coco
+# python yolo_video2.py --input videos/airport.mp4 --output output/airport_output.avi --yolo yolo-coco
 
 # import the necessary packages
 import numpy as np
@@ -9,32 +9,64 @@ import time
 import cv2
 import os
 
+
+def _get_box(detection):
+	# scale the bounding box coordinates back relative to
+	# the size of the image, keeping in mind that YOLO
+	# actually returns the center (x, y)-coordinates of
+	# the bounding box followed by the boxes' width and
+	# height
+	box = detection[0:4] * np.array([W, H, W, H])
+	(centerX, centerY, width, height) = box.astype("int")
+
+	# use the center (x, y)-coordinates to derive the top
+	# and and left corner of the bounding box
+	x = int(centerX - (width / 2))
+	y = int(centerY - (height / 2))
+
+	# update our list of bounding box coordinates,
+	# confidences, and class IDs
+	return [x, y, int(width), int(height)]
+
+
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--input", required=True,
-	help="path to input video")
-ap.add_argument("-o", "--output", required=True,
-	help="path to output video")
-ap.add_argument("-y", "--yolo", required=True,
-	help="base path to YOLO directory")
+ap.add_argument("-i", "--input", default=r"videos/dino_2.webm",
+                help="path to input video")
+ap.add_argument("-o", "--output", default=r"output/dino_2.avi",
+                help="path to output video")
+ap.add_argument("-cf", "--config", default=r"F:\Git\chrome_dino\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg",
+                help="base path to *.cfg")
+ap.add_argument("-w", "--weights", default=r"F:\Git\chrome_dino\chrome_dino\yolov3-tiny_obj_4c_10000.weights",
+                help="base path to *.weights")
+ap.add_argument("-n", "--names", default=r"F:\Git\chrome_dino\chrome_dino\data\obj.names",
+                help="base path to *.names")
 ap.add_argument("-c", "--confidence", type=float, default=0.5,
-	help="minimum probability to filter weak detections")
+                help="minimum probability to filter weak detections")
 ap.add_argument("-t", "--threshold", type=float, default=0.3,
-	help="threshold when applyong non-maxima suppression")
+                help="threshold when applyong non-maxima suppression")
 args = vars(ap.parse_args())
 
+# args = vars()
+# args["input"] = r"videos/dino_2.webm"
+# args["output_path"] = r"output/dino_2.avi"
+# args["config"] = r"F:\Git\chrome_dino\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg"
+# args["weights"] = r"F:\Git\chrome_dino\chrome_dino\yolov3-tiny_obj_4c_10000.weights"
+# args["names"] = r"F:\Git\chrome_dino\chrome_dino\data\obj.names"
+# args["confidence"] = 0.5
+# args["threshold"] = 0.3
+
 # load the COCO class labels our YOLO model was trained on
-labelsPath = os.path.sep.join([args["yolo"], "obj.names"])
+labelsPath = args["names"]
 LABELS = open(labelsPath).read().strip().split("\n")
 
 # initialize a list of colors to represent each possible class label
 np.random.seed(42)
-COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
-	dtype="uint8")
+COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-weightsPath = os.path.sep.join([args["yolo"], "yolov3-tiny_8000.weights"])
-configPath = os.path.sep.join([args["yolo"], "yolov3-tiny.cfg"])
+weightsPath = args["weights"]
+configPath = args["config"]
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO
@@ -63,6 +95,7 @@ except:
 	print("[INFO] no approx. completion time can be provided")
 	total = -1
 
+min_x_prev = 0
 # loop over frames from the video file stream
 while True:
 	# read the next frame from the file
@@ -80,8 +113,7 @@ while True:
 	# construct a blob from the input frame and then perform a forward
 	# pass of the YOLO object detector, giving us our bounding boxes
 	# and associated probabilities
-	blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416),
-		swapRB=True, crop=False)
+	blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
 	net.setInput(blob)
 	start = time.time()
 	layerOutputs = net.forward(ln)
@@ -92,6 +124,11 @@ while True:
 	boxes = []
 	confidences = []
 	classIDs = []
+
+	dinosaur = None
+	object = list()
+	is_gameover = False
+	min_x = 0
 
 	# loop over each of the layer outputs
 	for output in layerOutputs:
@@ -106,29 +143,19 @@ while True:
 			# filter out weak predictions by ensuring the detected
 			# probability is greater than the minimum probability
 			if confidence > args["confidence"]:
-				# scale the bounding box coordinates back relative to
-				# the size of the image, keeping in mind that YOLO
-				# actually returns the center (x, y)-coordinates of
-				# the bounding box followed by the boxes' width and
-				# height
-				box = detection[0:4] * np.array([W, H, W, H])
-				(centerX, centerY, width, height) = box.astype("int")
-
-				# use the center (x, y)-coordinates to derive the top
-				# and and left corner of the bounding box
-				x = int(centerX - (width / 2))
-				y = int(centerY - (height / 2))
-
-				# update our list of bounding box coordinates,
-				# confidences, and class IDs
-				boxes.append([x, y, int(width), int(height)])
+				if classID == 0:
+					dinosaur = _get_box(detection)
+				elif classID == 1 or classID == 2:
+					object.append((classID, _get_box(detection)))
+				elif classID == 3:
+					is_gameover = True
+				boxes.append(_get_box(detection))
 				confidences.append(float(confidence))
 				classIDs.append(classID)
 
 	# apply non-maxima suppression to suppress weak, overlapping
 	# bounding boxes
-	idxs = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"],
-		args["threshold"])
+	idxs = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"], args["threshold"])
 
 	# ensure at least one detection exists
 	if len(idxs) > 0:
@@ -142,16 +169,41 @@ while True:
 			color = [int(c) for c in COLORS[classIDs[i]]]
 			cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
 			text = "{}: {:.4f}".format(LABELS[classIDs[i]],
-				confidences[i])
+			                           confidences[i])
 			cv2.putText(frame, text, (x, y - 5),
-				cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+			            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+	# Cal Weight
+	speed = 0.0
+	distance = 0
+	type = -1
+	obj_height = 0
+	obj_width = 0
+
+	# get neanest object
+
+	front_obj = [obj[1][0] for obj in object if obj[1][0] > dinosaur[0]]
+	if len(front_obj) > 0:
+		min_x = min(front_obj)
+		speed = min_x_prev - min_x
+		min_x_prev = min_x
+
+		for obj in object:
+			if obj[1][0] == min_x:
+				type = obj[0]
+				obj_height, obj_width = obj[1][2], obj[1][3]
+				distance = max(min_x - dinosaur[0],0)
+	else:
+		speed = 0
+	text = f'speed: {speed: 10.2f}.  type: {type}.  distance: {distance:10d}.  obj_height: {obj_height:10d}.  obj_width: {obj_width:10d}'
+	cv2.putText(frame, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0) , 2)
 
 	# check if the video writer is None
 	if writer is None:
 		# initialize our video writer
 		fourcc = cv2.VideoWriter_fourcc(*"MJPG")
 		writer = cv2.VideoWriter(args["output"], fourcc, 30,
-			(frame.shape[1], frame.shape[0]), True)
+		                         (frame.shape[1], frame.shape[0]), True)
 
 		# some information on processing single frame
 		if total > 0:

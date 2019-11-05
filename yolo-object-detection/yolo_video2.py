@@ -1,5 +1,5 @@
 # USAGE
-# python yolo_video.py --input videos/airport.mp4 --output output/airport_output.avi --yolo yolo-coco
+# python yolo_video2.py --input videos/airport.mp4 --output output/airport_output.avi --yolo yolo-coco
 
 # import the necessary packages
 import numpy as np
@@ -11,20 +11,33 @@ import os
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--input", required=True,
+ap.add_argument("-i", "--input", default=r"videos/dino_2.webm",
 	help="path to input video")
-ap.add_argument("-o", "--output", required=True,
+ap.add_argument("-o", "--output", default=r"output/dino_2.avi",
 	help="path to output video")
-ap.add_argument("-y", "--yolo", required=True,
-	help="base path to YOLO directory")
+ap.add_argument("-cf", "--config", default=r"F:\Git\chrome_dino\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg",
+	help="base path to *.cfg")
+ap.add_argument("-w", "--weights", default=r"F:\Git\chrome_dino\chrome_dino\yolov3-tiny_obj_4c_10000.weights",
+	help="base path to *.weights")
+ap.add_argument("-n", "--names", default=r"F:\Git\chrome_dino\chrome_dino\data\obj.names",
+	help="base path to *.names")
 ap.add_argument("-c", "--confidence", type=float, default=0.5,
 	help="minimum probability to filter weak detections")
 ap.add_argument("-t", "--threshold", type=float, default=0.3,
 	help="threshold when applyong non-maxima suppression")
 args = vars(ap.parse_args())
 
+# args = vars()
+# args["input"] = r"videos/dino_2.webm"
+# args["output_path"] = r"output/dino_2.avi"
+# args["config"] = r"F:\Git\chrome_dino\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg"
+# args["weights"] = r"F:\Git\chrome_dino\chrome_dino\yolov3-tiny_obj_4c_10000.weights"
+# args["names"] = r"F:\Git\chrome_dino\chrome_dino\data\obj.names"
+# args["confidence"] = 0.5
+# args["threshold"] = 0.3
+
 # load the COCO class labels our YOLO model was trained on
-labelsPath = os.path.sep.join([args["yolo"], "obj.names"])
+labelsPath = args["names"]
 LABELS = open(labelsPath).read().strip().split("\n")
 
 # initialize a list of colors to represent each possible class label
@@ -33,8 +46,8 @@ COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
 	dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-weightsPath = os.path.sep.join([args["yolo"], "yolov3-tiny_8000.weights"])
-configPath = os.path.sep.join([args["yolo"], "yolov3-tiny.cfg"])
+weightsPath = args["weights"]
+configPath = args["config"]
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO
