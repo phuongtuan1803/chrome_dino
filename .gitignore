@@ -111,3 +111,8 @@ yolo-object-detection/.idea/vcs.xml
 yolo-object-detection/.idea/workspace.xml
 yolo-object-detection/.idea/yolo-object-detection.iml
 *.weights
+chrome_dino/chart.png
+yolo-object-detection/output/dino_22.avi
+yolo-object-detection/output/dino_2.avi
+yolo-object-detection/output/dino_1.avi
+yolo-object-detection/output/dino_1.avi
