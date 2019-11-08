@@ -11,9 +11,9 @@ import os
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--input", default=r"videos/dino_2.webm",
+ap.add_argument("-i", "--input", default=r"videos/dino_1.webm",
 	help="path to input video")
-ap.add_argument("-o", "--output", default=r"output/dino_2.avi",
+ap.add_argument("-o", "--output", default=r"output/dino_1.avi",
 	help="path to output video")
 ap.add_argument("-cf", "--config", default=r"F:\Git\chrome_dino\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg",
 	help="base path to *.cfg")
@@ -97,6 +97,7 @@ while True:
 		swapRB=True, crop=False)
 	net.setInput(blob)
 	start = time.time()
+
 	layerOutputs = net.forward(ln)
 	end = time.time()
 

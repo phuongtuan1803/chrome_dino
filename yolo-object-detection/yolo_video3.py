@@ -31,9 +31,9 @@ def _get_box(detection):
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--input", default=r"videos/dino_2.webm",
+ap.add_argument("-i", "--input", default=r"videos/dino_1.webm",
                 help="path to input video")
-ap.add_argument("-o", "--output", default=r"output/dino_2.avi",
+ap.add_argument("-o", "--output", default=r"output/dino_1.avi",
                 help="path to output video")
 ap.add_argument("-cf", "--config", default=r"F:\Git\chrome_dino\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg",
                 help="base path to *.cfg")
@@ -168,10 +168,8 @@ while True:
 			# draw a bounding box rectangle and label on the frame
 			color = [int(c) for c in COLORS[classIDs[i]]]
 			cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-			text = "{}: {:.4f}".format(LABELS[classIDs[i]],
-			                           confidences[i])
-			cv2.putText(frame, text, (x, y - 5),
-			            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+			text = "{}: {:.4f}".format(LABELS[classIDs[i]],confidences[i])
+			cv2.putText(frame, text, (x, y - 5),cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
 	# Cal Weight
 	speed = 0.0
@@ -181,7 +179,6 @@ while True:
 	obj_width = 0
 
 	# get neanest object
-
 	front_obj = [obj[1][0] for obj in object if obj[1][0] > dinosaur[0]]
 	if len(front_obj) > 0:
 		min_x = min(front_obj)
@@ -202,8 +199,7 @@ while True:
 	if writer is None:
 		# initialize our video writer
 		fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-		writer = cv2.VideoWriter(args["output"], fourcc, 30,
-		                         (frame.shape[1], frame.shape[0]), True)
+		writer = cv2.VideoWriter(args["output"], fourcc, 30,(frame.shape[1], frame.shape[0]), True)
 
 		# some information on processing single frame
 		if total > 0:
