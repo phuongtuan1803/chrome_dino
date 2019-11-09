@@ -6,7 +6,7 @@ import cv2
 import mss
 import mss.tools
 from PIL import Image
-
+from ScreenViewer import ScreenViewer
 
 def _get_box(detection):
 	# scale the bounding box coordinates back relative to
@@ -62,23 +62,27 @@ fourcc = cv2.VideoWriter_fourcc(*"MJPG")
 writer = None
 (W, H) = (None, None)
 min_x_prev = 0
-speed_prev = 0
+sv = ScreenViewer()
+sv.GetHWND('chrome://dino/ - Google Chrome')
+sv.Start()
 
 while True:
 	start = time.time()
-	monitor = {"top": 150, "left": 100, "width": 1820, "height": 400}
-	sct_img = mss.mss().grab(monitor)
-	img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+	# monitor = {"top": 150, "left": 100, "width": 1820, "height": 400}
+	# sct_img = mss.mss().grab(monitor)
+	# img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+
+	img = sv.GetScreen()
+
 	frame = np.array(img)
 
 	if W is None or H is None:
 		(H, W) = frame.shape[:2]
 	stop_0 = time.time()
 
-	blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
+	blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=True)
 	net.setInput(blob)
 	layerOutputs = net.forward(ln)
-	stop_1 = time.time()
 
 	# initialize our lists of detected bounding boxes, confidences,
 	# and class IDs, respectively
@@ -90,6 +94,7 @@ while True:
 	object = list()
 	is_gameover = False
 	min_x = 0
+	stop_0 = time.time()
 	detections = [detection for output in layerOutputs for detection in output]
 	scores = [detection[5:] for detection in detections]
 	classIDlist = [np.argmax(score) for score in scores]
@@ -98,8 +103,7 @@ while True:
 	select_items = [(detection, score, classID, confidence)
 						for (detection, score, classID, confidence) in zip(detections, scores, classIDlist, confidencelist)
 						if confidence > args["confidence"]]
-
-	stop_2 = time.time()
+	stop_1 = time.time()
 
 	for (detection, score, classID, confidence) in select_items:
 		if classID == 0:
@@ -142,23 +146,15 @@ while True:
 		front_obj = [obj[1][0] for obj in object if obj[1][0] > dinosaur[0]]
 		if len(front_obj) > 0:
 			min_x = min(front_obj)
-			speed = (max(0,min_x_prev - min_x) + speed_prev*2)/3
-			# if speed_prev*0.9 <= tmp_speed <= speed_prev*1.1:
-			# 	speed = tmp_speed
-			# elif tmp_speed < speed_prev*0.9:
-			# 	speed = speed_prev * 0.9
-			# else:
-			# 	speed = speed_prev * 1.1
-			# print(f'{tmp_speed}: {speed_prev}: {speed}')
+			speed = max(0,min_x_prev - min_x)
 			min_x_prev = min_x
-			speed_prev = speed
 
-			obj_neanest = [obj for obj in object if obj[1][0] == min_x][0]
-			obj_type = obj_neanest[0]
-			obj_height, obj_width = obj_neanest[1][2], obj_neanest[1][3]
-			distance = max(min_x - (dinosaur[0] + dinosaur[2]),0)
-
-			cv2.arrowedLine(frame, (dinosaur[0] + dinosaur[2], obj_neanest[1][1]), (dinosaur[0] + dinosaur[2] + distance, obj_neanest[1][1]), (0, 0, 255), 6,cv2.LINE_AA,0,0.01)
+			for obj in object:
+				if obj[1][0] == min_x:
+					obj_type = obj[0]
+					obj_height, obj_width = obj[1][2], obj[1][3]
+					distance = max(min_x - dinosaur[0],0)
+			cv2.arrowedLine(frame, (dinosaur[0], dinosaur[1]), (dinosaur[0] + distance, dinosaur[1]), (0, 0, 255), 1)
 		else:
 			speed = 0
 
@@ -167,16 +163,13 @@ while True:
 	else:
 		type_str = LABELS[obj_type]
 	text = f'speed: {speed: 10.2f}.  type: {type_str}.  distance: {distance:10d}.  obj_height: {obj_height:10d}.  obj_width: {obj_width:10d}'
-	cv2.putText(frame, text, (50, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0) , 2)
+	cv2.putText(frame, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0) , 2)
 
 	end = time.time()
 	fps_value = 1 / (end -start)
-	cv2.putText(frame, f'fps: {fps_value: 3.2f}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-	time_capture = (stop_0- start)/ (end -start) *100
-	time_yolo = (stop_1- stop_0)/ (end -start) *100
-	time_check_image = (stop_2 - stop_1) / (end - start) * 100
-	cv2.putText(frame, f'Time Screen Capture: {time_capture:.0f}%. Time YOLO: {time_yolo:.0f}%. Time check image: {time_check_image:.0f}%', (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+	per1 = (stop_0- start)/ (end -start) *100
+	per2 = (stop_1- start)/ (end -start) *100
+	cv2.putText(frame, f'fps: {fps_value: 3.2f}. Per1: {per1:.0f}%. Per2: {per2:.0f}%', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
 	cv2.imshow("frame", frame)
 	key = cv2.waitKey(1)
@@ -186,5 +179,6 @@ while True:
 		writer = cv2.VideoWriter(args["output"], fourcc, 30,(frame.shape[1], frame.shape[0]), True)
 	writer.write(frame)
 
+sv.Stop()
 writer.release()
 
