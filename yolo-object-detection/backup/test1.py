@@ -64,6 +64,13 @@ writer = None
 min_x_prev = 0
 speed_prev = 0
 
+speed = 0.0
+distance = 0
+obj_type = -1
+obj_height = 0
+obj_width = 0
+is_gameover = False
+
 while True:
 	start = time.time()
 	monitor = {"top": 150, "left": 100, "width": 1820, "height": 400}
@@ -136,7 +143,7 @@ while True:
 	obj_type = -1
 	obj_height = 0
 	obj_width = 0
-
+	is_gameover = False
 	# get neanest object
 	if not(len(object) == 0 or dinosaur is None):
 		front_obj = [obj[1][0] for obj in object if obj[1][0] > dinosaur[0]]

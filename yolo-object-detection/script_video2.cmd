@@ -1,1 +1,0 @@
-python yolo_video.py --input videos/dino_2.webm --output output/dino_2.avi --yolo yolo-coco
