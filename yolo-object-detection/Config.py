@@ -5,12 +5,16 @@ import time
 
 class Config:
 	# FOR DINO GAME SESSION
+	CHROME_PATH = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s"
+	GAME_URL = 'chrome://dino/'
+
 	LABELS_FILE = r"..\chrome_dino\data\obj.names"
+
 	YOLO_CONFIG_FILE = r"..\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg"
-	WEIGHTS_FILE = r"..\chrome_dino\yolov3-tiny_obj_4c_10000.weights"
+	WEIGHTS_FILE = r"..\chrome_dino\yolov3-tiny_obj_4c_15500.weights"
+
 	CONFIDENCE_VALUE = 0.8
 	THRESHOLD_VALUE = 0.3
-
 	LABELS = open(LABELS_FILE).read().strip().split("\n")
 	COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
@@ -24,7 +28,6 @@ class Config:
 	RANDOM_SET = [6, 5, 4, 3]
 	BODY_KEYS = ["W1", "W2", "b1", "b2"]
 	MUTATION_RANGE = [0.005, 0.5, 0.2, 0.05]
-
 
 	log_brief = None
 	log_survival = None

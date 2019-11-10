@@ -134,40 +134,36 @@ def evolve():
 	adam_eva = genesis(Config.POP_SIZE)
 	curr_gen = adam_eva.copy()
 	count_gen = 0
+	finest = 0
 	while True:
 		log1.info("-------------------------------------------------------")
 		log2.info("-------------------------------------------------------")
-		print("-------------------------------------------------------")
 		log1.info("Generation: {}".format(count_gen))
-		log1.info("a new day has come")
 		score = []
-		for trex in curr_gen:
+		for i, trex in enumerate(curr_gen):
 			game = DinoGameSession()
-			game.play(trex)
+			game.play(trex,f'Generation: {count_gen}. Population: {i+1}/{Config.POP_SIZE}. Finest: {finest}')
 			score.append(game.score)
-			log1.info(f"Gene: {trex}")
-			log1.info(f"Score: {game.score}")
+			finest = max(max(score),finest)
 		log1.info(score)
 		survivals, survival_inds = select_survivals(curr_gen, score)
 		log1.info(survival_inds)
-		log1.info("genarating next gen")
+		log1.info("Genarating next gen")
 		curr_gen = gen_to_max_size(survivals, Config.POP_SIZE)
 		count_gen += 1
 		log2.info(survivals)
-		if max(score) > 15:
-			log1.info(survivals)
-			continue
-		elif count_gen % 10 == 0:
-			log1.info(survivals)
-		log1.info("")
+
+		# if max(score) > 15:
+		# 	log1.info(survivals)
+		# 	break
+		# elif count_gen % 10 == 0:
+		# 	log1.info(survivals)
+		# log1.info("")
 
 
 if __name__ == '__main__':
 	Config.init()
 	log1 = Config.log_brief
 	log2 = Config.log_survival
-
-	log1.info("Start")
-	log2.info("Start")
 
 	evolve()

@@ -9,6 +9,7 @@ from PIL import Image
 import pyautogui
 import trex_nn
 from Config import Config
+from selenium.webdriver import Chrome
 
 
 class DinoGameSession:
@@ -17,9 +18,7 @@ class DinoGameSession:
 		self.score = 0
 
 	def open_url_on_chrome(url):
-		chrome_path = '/usr/bin/google-chrome %s'
-		webbrowser.get(chrome_path).open(url)
-		print("opening...")
+		webbrowser.get(Config.CHROME_PATH).open(Config.GAME_URL,new=2)
 
 	@staticmethod
 	def _start_game_():
@@ -28,7 +27,11 @@ class DinoGameSession:
 
 	@staticmethod
 	def press_up():
-		pyautogui.press("up")  # press a key down
+		pyautogui.press("up")
+
+	@staticmethod
+	def press_down():
+		pyautogui.press("down")
 
 	@staticmethod
 	def _get_box_(detection , H, W):
@@ -49,7 +52,8 @@ class DinoGameSession:
 		# confidences, and class IDs
 		return [x, y, int(width), int(height)]
 
-	def play(self, parameters_set):
+	def play(self, parameters_set, infor_str = ''):
+		# self.open_url_on_chrome()
 		self.score = 0
 
 		np.random.seed(42)
@@ -68,8 +72,10 @@ class DinoGameSession:
 		while True:
 
 			start = time.time()
-			monitor = {"top": 150, "left": 100, "width": 1820, "height": 400}
-			sct_img = mss.mss().grab(monitor)
+			with mss.mss() as sct:
+				monitor = {"top": 150, "left": 100, "width": 1820, "height": 400}
+				sct_img = sct.grab(monitor)
+
 			img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
 			frame = np.array(img)
 
@@ -144,7 +150,7 @@ class DinoGameSession:
 			if not is_game_started:
 				DinoGameSession._start_game_()
 				if game_over_sign is None:
-					print("Game Session is started")
+					# print("Game Session is started")
 					is_game_started = True
 					start_time = time.time()
 				else:
@@ -170,6 +176,8 @@ class DinoGameSession:
 				if len(front_obj) > 0:
 					min_x = min(front_obj)
 					speed = (max(0,min_x_prev - min_x) + speed_prev*2)/3
+					if min_x > min_x_prev:
+						self.score+=1
 					min_x_prev = min_x
 					speed_prev = speed
 
@@ -191,7 +199,7 @@ class DinoGameSession:
 
 			end = time.time()
 			fps_value = 1 / (end -start)
-			cv2.putText(frame, f'fps: {fps_value: 3.2f}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+			cv2.putText(frame, f'fps: {fps_value: 3.2f}. Score: {self.score}. {infor_str}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
 			time_capture = (stop_0- start)/ (end -start) *100
 			time_yolo = (stop_1- stop_0)/ (end -start) *100
@@ -200,7 +208,6 @@ class DinoGameSession:
 			cv2.imshow("frame", frame)
 			key = cv2.waitKey(1)
 			if key == 27 or is_game_over:
-				self.score = time.time() - start_time
 				break
 
 
