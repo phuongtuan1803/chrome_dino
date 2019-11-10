@@ -61,8 +61,8 @@ class DinoGameSession:
 
 		np.random.seed(42)
 		net = cv2.dnn.readNetFromDarknet(Config.YOLO_CONFIG_FILE, Config.WEIGHTS_FILE)
-		net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-		net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+		# net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+		# net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 		ln = net.getLayerNames()
 		ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
@@ -195,8 +195,8 @@ class DinoGameSession:
 
 			stop_3 = time.time()
 
-			# input_set = [speed, obj_type, distance, obj_height, obj_width]
-			input_set = [distance, speed, obj_width]
+			input_set = [speed, obj_type, distance, obj_height, obj_width]
+			# input_set = [distance, speed, obj_width]
 			x = threading.Thread(target=trex_nn.wrap_model, args=(input_set, parameters_set, Config.N_X), daemon=True)
 			# trex_nn.wrap_model(input_set, parameters_set, Config.N_X)
 			x.start()
