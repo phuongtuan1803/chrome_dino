@@ -10,7 +10,7 @@ import pyautogui
 import trex_nn
 from Config import Config
 from selenium.webdriver import Chrome
-
+import threading
 
 class DinoGameSession:
 
@@ -27,7 +27,10 @@ class DinoGameSession:
 
 	@staticmethod
 	def press_up():
-		pyautogui.press("up")
+		# pyautogui.press("up")
+		pyautogui.keyDown("up")
+		time.sleep(0.02)
+		pyautogui.keyUp("up")
 
 	@staticmethod
 	def press_down():
@@ -190,9 +193,14 @@ class DinoGameSession:
 				else:
 					speed = 0
 
+			stop_3 = time.time()
+
 			# input_set = [speed, obj_type, distance, obj_height, obj_width]
 			input_set = [distance, speed, obj_width]
-			trex_nn.wrap_model(input_set, parameters_set, Config.N_X)
+			x = threading.Thread(target=trex_nn.wrap_model, args=(input_set, parameters_set, Config.N_X), daemon=True)
+			# trex_nn.wrap_model(input_set, parameters_set, Config.N_X)
+			x.start()
+			stop_4 = time.time()
 
 			text = f'speed: {speed: 10.2f}.  type: {obj_type}.  distance: {distance:10d}.  obj_height: {obj_height:10d}.  obj_width: {obj_width:10d}'
 			cv2.putText(frame, text, (50, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0) , 2)
@@ -204,7 +212,9 @@ class DinoGameSession:
 			time_capture = (stop_0- start)/ (end -start) *100
 			time_yolo = (stop_1- stop_0)/ (end -start) *100
 			time_check_image = (stop_2 - stop_1) / (end - start) * 100
-			cv2.putText(frame, f'Time Screen Capture: {time_capture:.0f}%. Time YOLO: {time_yolo:.0f}%. Time check image: {time_check_image:.0f}%', (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+			time_nn = (stop_4 - stop_3) / (end - start) * 100
+
+			cv2.putText(frame, f'Time Screen Capture: {time_capture:.0f}%. Time YOLO: {time_yolo:.0f}%. Time check image: {time_check_image:.0f}%. Time Neutral Network: {time_nn:.0f}%', (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 			cv2.imshow("frame", frame)
 			key = cv2.waitKey(1)
 			if key == 27 or is_game_over:
