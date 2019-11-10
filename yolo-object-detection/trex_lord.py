@@ -31,10 +31,10 @@ def cv_to_body(adn):
 	tam thoi hard code 1 ty chu ko chac chet luon =))
 	"""
 	params = {}
-	params["W1"] = np.reshape(adn[:9], (3, 3))
-	params["W2"] = np.reshape(adn[9:12], (1, 3))
-	params["b1"] = np.reshape(adn[12:15], (3, 1))
-	params["b2"] = np.reshape(adn[15], (1, 1))
+	params["W1"] = np.reshape(adn[:25], (5, 5))
+	params["W2"] = np.reshape(adn[25:30], (1, 5))
+	params["b1"] = np.reshape(adn[30:35], (5, 1))
+	params["b2"] = np.reshape(adn[35], (1, 1))
 	return params
 
 
@@ -55,15 +55,15 @@ def random_match(random_set = Config.RANDOM_SET):
 
 
 def do_mutation(child, mutation_prob = Config.MUTATION_PROB):
-	mutation_rate = np.random.random(16)
+	mutation_rate = np.random.random(36)
 	new_child = child[:]
-	for ind in range(16):
+	for ind in range(36):
 		if mutation_rate[ind] < mutation_prob:
-			if ind < 9:
+			if ind < 25:
 				new_child[ind] += np.random.randn() * Config.MUTATION_RANGE[0]
-			elif ind < 12:
+			elif ind < 30:
 				new_child[ind] += np.random.randn() * Config.MUTATION_RANGE[1]
-			elif ind < 15:
+			elif ind < 35:
 				new_child[ind] += np.random.randn() * Config.MUTATION_RANGE[2]
 			else:
 				new_child[ind] += np.random.randn() * Config.MUTATION_RANGE[3]
@@ -71,13 +71,13 @@ def do_mutation(child, mutation_prob = Config.MUTATION_PROB):
 
 
 def crossver(adam, eva):
-	weight_adam = adam[:12]
-	weight_eva = eva[:12]
-	bias_adam = adam[12:]
-	bias_eva = eva[12:]
+	weight_adam = adam[:30]
+	weight_eva = eva[:30]
+	bias_adam = adam[30:]
+	bias_eva = eva[30:]
 
-	cut_1 = np.random.randint(0, 12)
-	cut_2 = np.random.randint(12, 16) - 12
+	cut_1 = np.random.randint(0, 30)
+	cut_2 = np.random.randint(30, 36) - 30
 
 	childs = []
 	childs.append(weight_adam[:cut_1] + weight_eva[cut_1:] + bias_adam[:cut_2] + bias_eva[cut_2:])
