@@ -11,7 +11,7 @@ class Config:
 	LABELS_FILE = r"..\chrome_dino\data\obj.names"
 
 	YOLO_CONFIG_FILE = r"..\chrome_dino\cfg\yolov3-tiny_obj_4c.cfg"
-	WEIGHTS_FILE = r"..\chrome_dino\yolov3-tiny_obj_4c_15500.weights"
+	WEIGHTS_FILE = r"..\chrome_dino\backup\yolov3-tiny_obj_4c_15500.weights"
 
 	CONFIDENCE_VALUE = 0.8
 	THRESHOLD_VALUE = 0.3
@@ -19,8 +19,8 @@ class Config:
 	COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
 	# FOR GENE
-	N_X = 3
-	N_H = 3
+	N_X = 5
+	N_H = 5
 	N_Y = 1
 	POP_SIZE = 12
 	MUTATION_PROB = 0.1
